@@ -12,7 +12,7 @@
 <p align="center">
   Useful for tech leads, who work on many repos and many orgs, and has annoying change to make to all repos.
   <br>
-  <code>bpr --cmd="echo .DS_STORE >> .gitignore"</code>
+  <code>bpr --org=username --cmd="echo .DS_STORE >> .gitignore"</code>
 </p>
 
 
@@ -37,7 +37,7 @@ export GITHUB_TOKEN=your_github_token
 
 # Personal repos
 # replace from_text with to_text in all files
-bpr --cmd='sed -i "" "s/from_text/to_text/g"'
+bpr --org=username --cmd='sed -i "" "s/from_text/to_text/g"'
 
 # Org repos
 # replace from_text with to_text in all files with .go extension
