@@ -32,7 +32,7 @@ type Flags struct {
 }
 
 const (
-	githubTokenEnv  = "GITHUB_TOKEN"
+	githubTokenEnv  = "GITHUB_TOKEN" // nolint: gosec
 	defaultBaseURL  = "github.com"
 	defaultLogLevel = LogLevelInfo
 	defaultParallel = 10

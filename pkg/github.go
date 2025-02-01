@@ -26,7 +26,7 @@ func NewGithubHandler(flags Flags) (*GithubHandler, error) {
 	)
 	tc := oauth2.NewClient(ctx, ts)
 
-	githubClient, err := github.NewEnterpriseClient(NewGithubURL().Api(flags.BaseURL), "", tc)
+	githubClient, err := github.NewEnterpriseClient(NewGithubURL().API(flags.BaseURL), "", tc)
 	if err != nil {
 		return nil, err
 	}
@@ -46,21 +46,22 @@ func (h *GithubHandler) Handle(repo string) error {
 
 	err = h.execCommand(repoDir, h.flags.Cmd)
 	if err != nil {
-		return fmt.Errorf("failed to execute command: %v", err)
+		return fmt.Errorf("failed to execute command: %w", err)
 	}
 
 	err = h.createBranch(repoDir, h.flags.PRBranch)
 	if err != nil {
-		return fmt.Errorf("failed to create branch: %v", err)
+		return fmt.Errorf("failed to create branch: %w", err)
 	}
 
 	err = h.commitChanges(repoDir)
 	if err != nil {
-		return fmt.Errorf("failed to commit changes: %v", err)
+		return fmt.Errorf("failed to commit changes: %w", err)
 	}
 
 	err = h.setHeadBranch(h.flags.Org, repo)
 	if err != nil {
+		return fmt.Errorf("failed to set head branch: %w", err)
 	}
 
 	if h.flags.Dry {
@@ -69,14 +70,14 @@ func (h *GithubHandler) Handle(repo string) error {
 	if !h.flags.Dry {
 		err = h.pushBranch(repoDir, repo, h.flags.PRBranch, h.flags.GithubToken)
 		if err != nil {
-			return fmt.Errorf("failed to push branch: %v", err)
+			return fmt.Errorf("failed to push branch: %w", err)
 		}
 	}
 
 	if !h.flags.Dry {
 		err = h.createPR(repo)
 		if err != nil {
-			return fmt.Errorf("failed to create PR: %v", err)
+			return fmt.Errorf("failed to create PR: %w", err)
 		}
 	}
 	return nil
@@ -89,7 +90,7 @@ func (h *GithubHandler) GetRepos() ([]string, error) {
 	// Check if the provided name is an organization or a user
 	isOrg, err := h.isOrganization(h.flags.Org)
 	if err != nil {
-		return nil, fmt.Errorf("failed to determine if %s is an organization: %v", h.flags.Org, err)
+		return nil, fmt.Errorf("failed to determine if %s is an organization: %w", h.flags.Org, err)
 	}
 
 	opt := &github.RepositoryListOptions{
@@ -109,7 +110,7 @@ func (h *GithubHandler) GetRepos() ([]string, error) {
 		}
 
 		if err != nil {
-			return nil, fmt.Errorf("failed to list repositories: %v", err)
+			return nil, fmt.Errorf("failed to list repositories: %w", err)
 		}
 
 		for _, repo := range repos {
@@ -130,10 +131,10 @@ func (h *GithubHandler) isOrganization(name string) (bool, error) {
 	org, _, err := h.githubClient.Organizations.Get(h.ctx, name)
 	if err != nil {
 		// If the error is because the name is not an organization, assume it's a user
-		if _, ok := err.(*github.ErrorResponse); ok {
+		if _, ok := err.(*github.ErrorResponse); ok { //nolint:errorlint
 			return false, nil
 		}
-		return false, fmt.Errorf("failed to check if %s is an organization: %v", name, err)
+		return false, fmt.Errorf("failed to check if %s is an organization: %w", name, err)
 	}
 	return org != nil, nil
 }
@@ -144,18 +145,18 @@ func (h *GithubHandler) cloneRepo(org, repo string) (string, error) {
 
 	if _, err := os.Stat(repoDir); err == nil {
 		if err := os.RemoveAll(repoDir); err != nil {
-			return "", fmt.Errorf("failed to remove existing directory: %v", err)
+			return "", fmt.Errorf("failed to remove existing directory: %w", err)
 		}
 	}
 
-	cmd := exec.Command("git", "clone", NewGithubURL().CloneURL(h.flags.BaseURL, h.flags.Org, repo), repoDir)
+	cmd := exec.Command("git", "clone", NewGithubURL().CloneURL(h.flags.BaseURL, h.flags.Org, repo), repoDir) //nolint:gosec
 	if h.flags.LogLevel == LogLevelDebug {
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
 	}
 
 	if err := cmd.Run(); err != nil {
-		return "", fmt.Errorf("failed to clone repository: %v", err)
+		return "", fmt.Errorf("failed to clone repository: %w", err)
 	}
 
 	return repoDir, nil
@@ -163,7 +164,7 @@ func (h *GithubHandler) cloneRepo(org, repo string) (string, error) {
 
 func (h *GithubHandler) execCommand(repoDir, cmd string) error {
 	slog.Info("Executing command", "cmd", cmd)
-	command := exec.Command("sh", "-c", cmd)
+	command := exec.Command("sh", "-c", cmd) //nolint:gosec
 	command.Dir = repoDir
 	if h.flags.LogLevel == LogLevelDebug {
 		command.Stdout = os.Stdout
@@ -175,7 +176,7 @@ func (h *GithubHandler) execCommand(repoDir, cmd string) error {
 
 func (h *GithubHandler) createBranch(repoDir, branchName string) error {
 	slog.Info("Creating branch", "branch", branchName)
-	cmd := exec.Command("git", "checkout", "-b", branchName)
+	cmd := exec.Command("git", "checkout", "-b", branchName) //nolint:gosec
 	cmd.Dir = repoDir
 	if h.flags.LogLevel == LogLevelDebug {
 		cmd.Stdout = os.Stdout
@@ -186,7 +187,7 @@ func (h *GithubHandler) createBranch(repoDir, branchName string) error {
 }
 
 func (h *GithubHandler) commitChanges(repoDir string) error {
-	cmd := exec.Command("git", "add", ".")
+	cmd := exec.Command("git", "add", ".") //nolint:gosec
 	cmd.Dir = repoDir
 	if h.flags.LogLevel == LogLevelDebug {
 		cmd.Stdout = os.Stdout
@@ -194,11 +195,11 @@ func (h *GithubHandler) commitChanges(repoDir string) error {
 	}
 
 	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("failed to add changes: %v", err)
+		return fmt.Errorf("failed to add changes: %w", err)
 	}
 
 	slog.Info("Committing changes", "msg", h.flags.PRCommitMsg)
-	cmd = exec.Command("git", "commit", "-m", h.flags.PRCommitMsg)
+	cmd = exec.Command("git", "commit", "-m", h.flags.PRCommitMsg) //nolint:gosec
 	cmd.Dir = repoDir
 	if h.flags.LogLevel == LogLevelDebug {
 		cmd.Stdout = os.Stdout
@@ -212,7 +213,7 @@ func (h *GithubHandler) pushBranch(repoDir, repo, branchName, token string) erro
 	slog.Info("Pushing changes", "branch", branchName, "org", h.flags.Org, "repo", repo)
 	remoteURL := NewGithubURL().RemoteURL(h.flags.BaseURL, h.flags.Org, repo, token)
 
-	cmdSetRemote := exec.Command("git", "remote", "set-url", "origin", remoteURL)
+	cmdSetRemote := exec.Command("git", "remote", "set-url", "origin", remoteURL) //nolint:gosec
 	cmdSetRemote.Dir = repoDir
 	if h.flags.LogLevel == LogLevelDebug {
 		cmdSetRemote.Stdout = os.Stdout
@@ -220,10 +221,10 @@ func (h *GithubHandler) pushBranch(repoDir, repo, branchName, token string) erro
 	}
 
 	if err := cmdSetRemote.Run(); err != nil {
-		return fmt.Errorf("failed to set remote URL: %v", err)
+		return fmt.Errorf("failed to set remote URL: %w", err)
 	}
 
-	cmdPush := exec.Command("git", "push", "origin", branchName)
+	cmdPush := exec.Command("git", "push", "origin", branchName) //nolint:gosec
 	cmdPush.Dir = repoDir
 	if h.flags.LogLevel == LogLevelDebug {
 		cmdPush.Stdout = os.Stdout
@@ -231,7 +232,7 @@ func (h *GithubHandler) pushBranch(repoDir, repo, branchName, token string) erro
 	}
 
 	if err := cmdPush.Run(); err != nil {
-		return fmt.Errorf("failed to push changes: %v", err)
+		return fmt.Errorf("failed to push changes: %w", err)
 	}
 
 	return nil
@@ -261,7 +262,7 @@ func (h *GithubHandler) createPR(repo string) error {
 	// Create the pull request using the GitHub API
 	pr, _, err := h.githubClient.PullRequests.Create(h.ctx, h.flags.Org, repo, newPR)
 	if err != nil {
-		return fmt.Errorf("failed to create PR: %v", err)
+		return fmt.Errorf("failed to create PR: %w", err)
 	}
 
 	slog.Info("Pull request created successfully", "url", pr.GetHTMLURL())

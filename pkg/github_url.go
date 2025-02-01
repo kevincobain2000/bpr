@@ -13,7 +13,7 @@ func NewGithubURL() *GithubURL {
 	return &GithubURL{}
 }
 
-func (e *GithubURL) Api(baseURL string) string {
+func (e *GithubURL) API(baseURL string) string {
 	s := fmt.Sprintf("https://%s/api/v3", baseURL)
 	slog.Info("API URL", "url", s)
 	return s

@@ -15,7 +15,7 @@ var version = "dev"
 
 func main() {
 	pkg.ParseFlags(&f)
-	pkg.SetupLoggingStdout(f)
+	pkg.SetupLoggingStdout(f) // nolint: errcheck
 	if err := pkg.ValidateFlags(&f); err != nil {
 		slog.Error("Failed to validate flags:", "error", err)
 		os.Exit(1)
@@ -40,7 +40,7 @@ func main() {
 	for _, repo := range selectedRepos {
 		slog.Info("Selected", "repo", repo)
 	}
-	//promptui are you sure?
+
 	prompt := promptui.Prompt{
 		Label:     "Are you sure you want to continue?",
 		IsConfirm: true,
