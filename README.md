@@ -69,7 +69,7 @@ bpr --org=your_org --base-url=ghe.company.com --cmd='echo .DS_STORE >> .gitignor
   -cmd string
     	action command to run (required)
   -default-branch string
-    	head branch
+    	Where the PR will be created to (empty for default)
   -dry
     	dry run
   -log-level int

@@ -50,7 +50,7 @@ func ParseFlags(f *Flags) {
 
 	flag.StringVar(&f.Repos, "repos", "", "comma-separated list of repositories (empty for all)")
 	flag.StringVar(&f.BaseURL, "base-url", defaultBaseURL, "GitHub base URL")
-	flag.StringVar(&f.DefaultBranch, "default-branch", "", "head branch")
+	flag.StringVar(&f.DefaultBranch, "default-branch", "", "Where the PR will be created to (empty for default)")
 	flag.StringVar(&f.PRTitle, "pr-title", defaultPRTitle, "pull request title")
 	flag.StringVar(&f.PRBody, "pr-body", defaultPRBody, "pull request body")
 
