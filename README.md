@@ -93,3 +93,8 @@ bpr --org=your_org --base-url=ghe.company.com --cmd='echo .DS_STORE >> .gitignor
   -version
     	print version and exit
 ```
+
+
+## CHANGELOG
+
+- **v1.0.0** - Initial release
