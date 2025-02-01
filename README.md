@@ -5,7 +5,9 @@
 <p align="center">
   Bulk PR creator for Github and Github Enterprise.
   <br>
-  Edit, delete files in multiple repos at once.
+  Edit, delete files in multiple repos at once & create PRs.
+  <br>
+  And NO, it won't delete, or force push to any existing branch.
 </p>
 <p align="center">
   Useful for tech leads, who work on many repos and many orgs, and has annoying change to make to all repos.
