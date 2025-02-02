@@ -36,6 +36,10 @@ func main() {
 	}
 
 	selectedRepos := pkg.NewSlices().FilterByCSV(repos, flags.Repos)
+	if selectedRepos == nil {
+		slog.Warn("No repositories were selected")
+		return
+	}
 	for _, repo := range selectedRepos {
 		slog.Info("Selected repository", "repo", repo)
 	}
