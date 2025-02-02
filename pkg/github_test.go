@@ -86,26 +86,6 @@ func TestIsOrganization(t *testing.T) {
 	assert.True(t, isOrg)
 }
 
-func TestCloneRepo(t *testing.T) {
-	// This test would typically mock exec.Command, omitted for brevity
-}
-
-func TestExecCommand(t *testing.T) {
-	// This test would typically mock exec.Command, omitted for brevity
-}
-
-func TestCreateBranch(t *testing.T) {
-	// This test would typically mock exec.Command, omitted for brevity
-}
-
-func TestCommitChanges(t *testing.T) {
-	// This test would typically mock exec.Command, omitted for brevity
-}
-
-func TestPushBranch(t *testing.T) {
-	// This test would typically mock exec.Command, omitted for brevity
-}
-
 func TestSetHeadBranch(t *testing.T) {
 	defer gock.Off()
 	h := setupGithubHandler()
