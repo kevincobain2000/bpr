@@ -1,5 +1,5 @@
 <p align="center">
-  <img alt="bulk PR creator" alt="Bulk PR creator" src="https://imgur.com/GkKyjKT.png" width="300">
+  <img alt="Bulk PR creator" src="https://imgur.com/GkKyjKT.png" width="300">
 </p>
 
 <p align="center">
@@ -62,6 +62,12 @@ bpr --org=your_org --base-url=ghe.company.com --cmd='echo .DS_STORE >> .gitignor
 # Above are the examples on how to use bulk PR creator (bpr) by giving it a command as cmd
 # Write a new command to: <<your GPT prompt>>
 ```
+
+<p align="center">
+  <img alt="do not text me on how to use it." src="https://imgur.com/hH1lR8K.png">
+</p>
+
+
 
 ## Advanced Usage
 
