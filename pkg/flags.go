@@ -26,6 +26,7 @@ type Flags struct {
 	PRBranch      string
 	PRCommitMsg   string
 	Parallel      int
+	NoInteractive bool
 	Dry           bool
 	LogLevel      int
 	Version       bool
@@ -51,21 +52,27 @@ func ParseFlags(f *Flags) {
 	flag.StringVar(&f.Repos, "repos", "", "comma-separated list of repositories (empty for all)")
 	flag.StringVar(&f.BaseURL, "base-url", defaultBaseURL, "GitHub base URL")
 	flag.StringVar(&f.DefaultBranch, "default-branch", "", "Where the PR will be created to (empty for default)")
+
 	flag.StringVar(&f.PRTitle, "pr-title", defaultPRTitle, "pull request title")
 	flag.StringVar(&f.PRBody, "pr-body", defaultPRBody, "pull request body")
-
 	flag.StringVar(&f.PRBranch, "pr-branch", defaultPRBranch, "pull request branch")
 	flag.StringVar(&f.PRCommitMsg, "pr-commit-msg", defaultPRCommit, "pull request commit message")
-	flag.IntVar(&f.Parallel, "parallel", defaultParallel, "number of parallel requests")
-	flag.BoolVar(&f.Dry, "dry", false, "dry run")
 
+	flag.IntVar(&f.Parallel, "parallel", defaultParallel, "number of parallel requests")
+	flag.BoolVar(&f.NoInteractive, "no-interactive", false, "no interactive prompt")
+	flag.BoolVar(&f.Dry, "dry", false, "dry run")
 	flag.IntVar(&f.LogLevel, "log-level", defaultLogLevel, "log level (0=info, -4=debug, 4=warn, 8=error)")
+
 	flag.BoolVar(&f.Version, "version", false, "print version and exit")
 
 	flag.Parse()
 }
 
-func ValidateFlags(f *Flags) error {
+func ValidateFlags(f *Flags, version string) error {
+	if f.Version {
+		slog.Info("Version", "version", version)
+		os.Exit(0)
+	}
 	if f.GithubToken == "" {
 		f.GithubToken = os.Getenv(githubTokenEnv)
 	}

@@ -43,6 +43,7 @@ func (h *GithubHandler) Handle(repo string) error {
 		return err
 	}
 	defer os.RemoveAll(repoDir)
+	defer slog.Info("Cleaning up repo directory", "dir", repoDir)
 
 	err = h.execCommand(repoDir, h.flags.Cmd)
 	if err != nil {
