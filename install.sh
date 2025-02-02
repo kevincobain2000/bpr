@@ -3,11 +3,14 @@
 BIN_DIR=$(pwd)
 
 THE_ARCH_BIN=''
-OWNER='kevincobain2000'
 THIS_PROJECT_NAME='bpr'
+OWNER='kevincobain2000'
 
 THISOS=$(uname -s)
 ARCH=$(uname -m)
+
+INSTALL_VERSION=${INSTALL_VERSION:-latest}
+echo "Installing $THIS_PROJECT_NAME version: $INSTALL_VERSION"
 
 case $THISOS in
    Linux*)
@@ -50,9 +53,19 @@ if [ -z "$THE_ARCH_BIN" ]; then
    exit 1
 fi
 
-curl -kL --progress-bar https://github.com/$OWNER/$THIS_PROJECT_NAME/releases/latest/download/$THE_ARCH_BIN -o "$BIN_DIR"/$THIS_PROJECT_NAME
+DOWNLOAD_URL="https://github.com/$OWNER/$THIS_PROJECT_NAME/releases/download/$INSTALL_VERSION/$THE_ARCH_BIN"
+if [ "$INSTALL_VERSION" = "latest" ]; then
+  DOWNLOAD_URL="https://github.com/$OWNER/$THIS_PROJECT_NAME/releases/$INSTALL_VERSION/download/$THE_ARCH_BIN"
+fi
 
-chmod +x "$BIN_DIR"/$THIS_PROJECT_NAME
+echo "Downloading from $DOWNLOAD_URL..."
+HTTP_STATUS=$(curl -kL --progress-bar -w "%{http_code}" -o "$BIN_DIR/$THIS_PROJECT_NAME" "$DOWNLOAD_URL")
+
+if [ "$HTTP_STATUS" -ne 200 ]; then
+  echo "Error: Failed to download $THIS_PROJECT_NAME. HTTP status code: $HTTP_STATUS"
+  exit 1
+fi
+
+chmod +x "$BIN_DIR/$THIS_PROJECT_NAME"
 
 echo "Installed successfully to: $BIN_DIR/$THIS_PROJECT_NAME"
-
