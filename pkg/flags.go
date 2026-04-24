@@ -25,11 +25,12 @@ type Flags struct {
 	PRBody        string
 	PRBranch      string
 	PRCommitMsg   string
-	Parallel      int
-	NoInteractive bool
-	Dry           bool
-	LogLevel      int
-	Version       bool
+	Parallel        int
+	NoInteractive   bool
+	Dry             bool
+	PushToDefault   bool
+	LogLevel        int
+	Version         bool
 }
 
 const (
@@ -61,6 +62,7 @@ func ParseFlags(f *Flags) {
 	flag.IntVar(&f.Parallel, "parallel", defaultParallel, "number of parallel requests")
 	flag.BoolVar(&f.NoInteractive, "no-interactive", false, "no interactive prompt")
 	flag.BoolVar(&f.Dry, "dry", false, "dry run")
+	flag.BoolVar(&f.PushToDefault, "push-to-default", false, "push changes directly to the default branch instead of creating a PR")
 	flag.IntVar(&f.LogLevel, "log-level", defaultLogLevel, "log level (0=info, -4=debug, 4=warn, 8=error)")
 
 	flag.BoolVar(&f.Version, "version", false, "print version and exit")
@@ -93,14 +95,16 @@ func ValidateFlags(f *Flags, version string) error {
 	if f.Cmd == "" {
 		return fmt.Errorf("missing exec command (--cmd)")
 	}
-	if f.PRTitle == "" {
-		return fmt.Errorf("missing pull request title (--pr-title)")
-	}
-	if f.PRBody == "" {
-		return fmt.Errorf("missing pull request body (--pr-body)")
-	}
-	if f.PRBranch == "" {
-		return fmt.Errorf("missing pull request branch (--pr-branch)")
+	if !f.PushToDefault {
+		if f.PRTitle == "" {
+			return fmt.Errorf("missing pull request title (--pr-title)")
+		}
+		if f.PRBody == "" {
+			return fmt.Errorf("missing pull request body (--pr-body)")
+		}
+		if f.PRBranch == "" {
+			return fmt.Errorf("missing pull request branch (--pr-branch)")
+		}
 	}
 	if f.PRCommitMsg == "" {
 		return fmt.Errorf("missing pull request commit message (--pr-commit-msg)")
@@ -112,7 +116,7 @@ func ValidateFlags(f *Flags, version string) error {
 		return fmt.Errorf("invalid log level (--log-level)")
 	}
 
-	if f.PRBranch == defaultPRBranch {
+	if !f.PushToDefault && f.PRBranch == defaultPRBranch {
 		gen, err := g.NewGenerator([]g.Option{
 			func(opt *g.Options) error {
 				opt.Length = 4
