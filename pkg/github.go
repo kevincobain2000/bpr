@@ -124,6 +124,10 @@ func (h *GithubHandler) GetRepos() ([]string, error) {
 		}
 
 		for _, repo := range repos {
+			if repo.GetArchived() {
+				slog.Info("Skipping archived repository", "repo", *repo.Name)
+				continue
+			}
 			repoNames = append(repoNames, *repo.Name)
 		}
 
