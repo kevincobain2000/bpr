@@ -50,9 +50,16 @@ func (h *GithubHandler) Handle(repo string) error {
 		return fmt.Errorf("failed to execute command: %w", err)
 	}
 
-	err = h.createBranch(repoDir, h.flags.PRBranch)
+	err = h.setHeadBranch(h.flags.Org, repo)
 	if err != nil {
-		return fmt.Errorf("failed to create branch: %w", err)
+		return fmt.Errorf("failed to set head branch: %w", err)
+	}
+
+	if !h.flags.PushToDefault {
+		err = h.createBranch(repoDir, h.flags.PRBranch)
+		if err != nil {
+			return fmt.Errorf("failed to create branch: %w", err)
+		}
 	}
 
 	err = h.commitChanges(repoDir)
@@ -60,26 +67,28 @@ func (h *GithubHandler) Handle(repo string) error {
 		return fmt.Errorf("failed to commit changes: %w", err)
 	}
 
-	err = h.setHeadBranch(h.flags.Org, repo)
-	if err != nil {
-		return fmt.Errorf("failed to set head branch: %w", err)
-	}
-
 	if h.flags.Dry {
 		slog.Info("Dry run enabled, skipping push and PR creation")
-	}
-	if !h.flags.Dry {
-		err = h.pushBranch(repoDir, repo, h.flags.PRBranch, h.flags.GithubToken)
-		if err != nil {
-			return fmt.Errorf("failed to push branch: %w", err)
-		}
+		return nil
 	}
 
-	if !h.flags.Dry {
-		err = h.createPR(repo)
+	if h.flags.PushToDefault {
+		slog.Info("Pushing changes directly to default branch", "branch", h.flags.DefaultBranch)
+		err = h.pushBranch(repoDir, repo, h.flags.DefaultBranch, h.flags.GithubToken)
 		if err != nil {
-			return fmt.Errorf("failed to create PR: %w", err)
+			return fmt.Errorf("failed to push to default branch: %w", err)
 		}
+		return nil
+	}
+
+	err = h.pushBranch(repoDir, repo, h.flags.PRBranch, h.flags.GithubToken)
+	if err != nil {
+		return fmt.Errorf("failed to push branch: %w", err)
+	}
+
+	err = h.createPR(repo)
+	if err != nil {
+		return fmt.Errorf("failed to create PR: %w", err)
 	}
 	return nil
 }
